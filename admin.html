@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EARN-PRO-MAX - Admin Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa; color: #1a1a2e;
+        }
+       .login-box {
+            max-width: 400px; margin: 100px auto; background: white;
+            padding: 35px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+       .login-box h2 { text-align: center; margin-bottom: 25px; color: #1a1a2e; }
+       .header {
+            background: #1a1a2e; color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+       .header h1 { font-size: 20px; font-weight: 600; }
+       .logout-btn {
+            background: rgba(255,255,255,0.2); padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 14px;
+        }
+       .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+       .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-bottom: 25px;
+        }
+       .stat-card {
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08); text-align: center;
+        }
+       .stat-card h3 { font-size: 32px; color: #1a1a2e; margin-bottom: 5px; }
+       .stat-card p { font-size: 13px; color: #666; font-weight: 500; }
+       .tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;
+        }
+       .tab {
+            padding: 12px 20px; background: white; border-radius: 8px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+       .tab.active { background: #1a1a2e; color: white; }
+       .section {
+            background: white; border-radius: 12px; padding: 22px;
+            margin-bottom: 20px; box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+       .section-title { font-size: 18px; font-weight: 600; margin-bottom: 18px; }
+       .input-group { margin-bottom: 16px; }
+       .input-group label {
+            display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500;
+        }
+       .input-group input,.input-group textarea,.input-group select {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px;
+        }
+        button {
+            padding: 12px 24px; background: #1a1a2e; color: white;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        button:hover { background: #16213e; }
+        button.danger { background: #dc3545; }
+        button.success { background: #28a745; }
+       .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e8eaf6; font-size: 13px; }
+        th { background: #f8f9ff; color: #1a1a2e; font-weight: 600; }
+       .badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+       .badge-success { background: #d4edda; color: #155724; }
+       .badge-pending { background: #fff3cd; color: #856404; }
+       .badge-reject { background: #f8d7da; color: #721c24; }
+       .action-btn { padding: 6px 12px; font-size: 12px; margin-right: 5px; }
+       .hidden { display: none; }
+       .msg { padding: 12px; margin: 10px 0; border-radius: 8px; text-align: center; font-size: 14px; }
+       .success { background: #d4edda; color: #155724; }
+       .error { background: #f8d7da; color: #721c24; }
+       .plan-card {
+            border: 2px solid #e8eaf6; padding: 18px; border-radius: 10px;
+            margin-bottom: 15px; background: #fafbff;
+        }
+       .plan-card h4 { font-size: 16px; margin-bottom: 10px; }
+       .plan-info { font-size: 13px; color: #666; margin: 5px 0; }
+       .toggle { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+       .toggle input { width: 50px; height: 25px; }
+    </style>
+</head>
+<body>
+    <div id="loginPage">
+        <div class="login-box">
+            <h2>এডমিন লগইন</h2>
+            <div id="loginMsg"></div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="adminUser" placeholder="admin">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
+            </div>
+            <button onclick="adminLogin()" style="width:100%;">লগইন</button>
+            <p style="font-size:12px; color:#999; text-align:center; margin-top:15px;">ডিফল্ট: admin / admin123</p>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+        <div class="header">
+            <h1>EARN-PRO-MAX Admin</h1>
+            <div class="logout-btn" onclick="adminLogout()">লগআউট</div>
+        </div>
+
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalUsers">0</h3>
+                    <p>মোট ইউজার</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="activeUsers">0</h3>
+                    <p>একটিভ ইউজার</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingPayments">0</h3>
+                    <p>পেন্ডিং পেমেন্ট</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pendingWithdraws">0</h3>
+                    <p>পেন্ডিং উইথড্র</p>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('dashboard')">ড্যাশবোর্ড</div>
+                <div class="tab" onclick="showTab('payments')">পেমেন্ট</div>
+                <div class="tab" onclick="showTab('withdraws')">উইথড্র</div>
+                <div class="tab" onclick="showTab('plans')">প্ল্যান</div>
+                <div class="tab" onclick="showTab('users')">ইউজার</div>
+                <div class="tab" onclick="showTab('settings')">সেটিংস</div>
+            </div>
+
+            <div id="dashboardTab" class="tab-content">
+                <div class="section">
+                    <div class="section-title">সাম্প্রতিক লেনদেন</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>টাইপ</th>
+                                    <th>এমাউন্ট</th>
+                                    <th>তারিখ</th>
+                                    <th>স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTxns"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="paymentsTab" class="tab-content hidden">
+                <div class="section">
+                    <div class="section-title">পেন্ডিং পেমেন্ট</div>
+                    <div id="paymentsMsg"></div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>প্যাকেজ</th>
+                                    <th>এমাউন্ট</th>
+                                    <th>Txn ID</th>
+                                    <th>তারিখ</th>
+                                    <th>একশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="withdrawsTab" class="tab-content hidden">
+                <div class="section">
+                    <div class="section-title">পেন্ডিং উইথড্র</div>
+                    <div id="withdrawsMsg"></div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>এমাউন্ট</th>
+                                    <th>মেথড</th>
+                                    <th>নাম্বার</th>
+                                    <th>তারিখ</th>
+                                    <th>একশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withdrawsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="plansTab" class="tab-content hidden">
+                <div class="section">
+                    <div class="section-title">প্যাকেজ ম্যানেজ করুন</div>
+                    <div id="plansMsg"></div>
+                    <button onclick="addPlan()">+ নতুন প্ল্যান যোগ করুন</button>
+                    <div id="plansList" style="margin-top:20px;"></div>
+                </div>
+            </div>
+
+            <div id="usersTab" class="tab-content hidden">
+                <div class="section">
+                    <div class="section-title">সব ইউজার</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>ইউজারনেম</th>
+                                    <th>মোবাইল</th>
+                                    <th>ব্যালেন্স</th>
+                                    <th>প্ল্যান</th>
+                                    <th>একশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsTab" class="tab-content hidden">
+                <div class="section">
+                    <div class="section-title">সাইট সেটিংস</div>
+                    <div id="settingsMsg"></div>
+                    <div class="input-group">
+                        <label>সাইটের নাম</label>
+                        <input type="text" id="siteName" placeholder="EARN-PRO-MAX">
+                    </div>
+                    <div class="input-group">
+                        <label>সাইট লোগো URL</label>
+                        <input type="text" id="siteLogo" placeholder="https://example.com/logo.png">
+                    </div>
+                    <div class="input-group">
+                        <label>ডেইলি নোটিশ</label>
+                        <textarea id="dailyNotice" rows="3" placeholder="সবার জন্য নোটিশ লিখুন"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>টেলিগ্রাম ইউজারনেম</label>
+                        <input type="text" id="telegramUsername" placeholder="username (without @)">
+                    </div>
+                    <div class="input-group">
+                        <label>বিকাশ নাম্বার</label>
+                        <input type="text" id="bkashNumber" placeholder="01XXXXXXXXX">
+                    </div>
+                    <div class="input-group">
+                        <label>নগদ নাম্বার</label>
+                        <input type="text" id="nagadNumber" placeholder="01XXXXXXXXX">
+                    </div>
+                    <div class="input-group">
+                        <label>পেমেন্ট ইন্সট্রাকশন</label>
+                        <textarea id="paymentInstruction" rows="3"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>রেফার বোনাস (৳)</label>
+                        <input type="number" id="referBonus" placeholder="25">
+                    </div>
+                    <div class="input-group">
+                        <label>ইনএকটিভ মেসেজ</label>
+                        <textarea id="inactiveMessage" rows="2"></textarea>
+                    </div>
+                    <button onclick="saveSettings()">সেটিংস সেভ করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminLoggedIn = false;
+        let users = [];
+        let settings = {};
+        let transactions = [];
+        let pendingPayments = [];
+        let pendingWithdraws = [];
+
+        window.onload = function(){
+            if(localStorage.getItem('adminLoggedIn') === 'true'){
+                showAdminPanel();
+            }
+        }
+
+        function adminLogin(){
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            if(user === 'admin' && pass === 'admin123'){
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+            } else {
+                showMsg('loginMsg', 'ইউজারনেম বা পাসওয়ার্ড ভুল', 'error');
+            }
+        }
+
+        function adminLogout(){
+            localStorage.removeItem('adminLoggedIn');
+            location.reload();
+        }
+
+        function showAdminPanel(){
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadData();
+        }
+
+        function loadData(){
+            users = JSON.parse(localStorage.getItem('users') || '[]');
+            settings = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+            transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            pendingPayments = JSON.parse(localStorage.getItem('pendingPayments') || '[]');
+            pendingWithdraws = JSON.parse(localStorage.getItem('pendingWithdraws') || '[]');
+
+            updateStats();
+            loadRecentTxns();
+            loadPayments();
+            loadWithdraws();
+            loadPlans();
+            loadUsers();
+            loadSettings();
+        }
+
+        function updateStats(){
+            document.getElementById('totalUsers').innerText = users.length;
+            document.getElementById('activeUsers').innerText = users.filter(u => u.planActive).length;
+            document.getElementById('pendingPayments').innerText = pendingPayments.length;
+            document.getElementById('pendingWithdraws').innerText = pendingWithdraws.length;
+        }
+
+        function showTab(tab){
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+        }
+
+        function loadRecentTxns(){
+            const tbody = document.getElementById('recentTxns');
+            const recent = transactions.slice(-10).reverse();
+            tbody.innerHTML = '';
+            recent.forEach(txn => {
+                let badgeClass = 'badge-pending';
+                if(txn.status === 'Success') badgeClass = 'badge-success';
+                if(txn.status === 'Rejected') badgeClass = 'badge-reject';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${txn.username}</td>
+                        <td>${txn.type}</td>
+                        <td>৳${txn.amount}</td>
+                        <td>${new Date(txn.date).toLocaleDateString('bn-BD')}</td>
+                        <td><span class="badge ${badgeClass}">${txn.status}</span></td>
+                    </tr>`;
+            });
+        }
+
+        function loadPayments(){
+            const tbody = document.getElementById('paymentsTable');
+            tbody.innerHTML = '';
+            if(pendingPayments.length === 0){
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো পেন্ডিং পেমেন্ট নেই</td></tr>';
+                return;
+            }
+            pendingPayments.forEach((p, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${p.username}</td>
+                        <td>${p.packageName}</td>
+                        <td>৳${p.amount}</td>
+                        <td>${p.txnId}</td>
+                        <td>${new Date(p.date).toLocaleDateString('bn-BD')}</td>
+                        <td>
+                            <button class="action-btn success" onclick="approvePayment(${idx})">এপ্রুভ</button>
+                            <button class="action-btn danger" onclick="rejectPayment(${idx})">রিজেক্ট</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function approvePayment(idx){
+            const payment = pendingPayments[idx];
+            const user = users.find(u => u.username === payment.username);
+            if(user){
+                const plan = settings.plans.find(p => p.name === payment.packageName);
+                user.planActive = true;
+                user.planPrice = plan.price;
+                user.planName = plan.name;
+                saveUsers();
+
+                transactions.forEach(t => {
+                    if(t.username === payment.username && t.type === 'Plan Purchase' && t.status === 'Pending'){
+                        t.status = 'Success';
+                    }
+                });
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+            }
+            pendingPayments.splice(idx, 1);
+            localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
+            loadData();
+            showMsg('paymentsMsg', 'পেমেন্ট এপ্রুভ হয়েছে', 'success');
+        }
+
+        function rejectPayment(idx){
+            pendingPayments.splice(idx, 1);
+            localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
+            loadData();
+            showMsg('paymentsMsg', 'পেমেন্ট রিজেক্ট হয়েছে', 'error');
+        }
+
+        function loadWithdraws(){
+            const tbody = document.getElementById('withdrawsTable');
+            tbody.innerHTML = '';
+            if(pendingWithdraws.length === 0){
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো পেন্ডিং উইথড্র নেই</td></tr>';
+                return;
+            }
+            pendingWithdraws.forEach((w, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${w.username}</td>
+                        <td>৳${w.amount}</td>
+                        <td>${w.method}</td>
+                        <td>${w.number}</td>
+                        <td>${new Date(w.date).toLocaleDateString('bn-BD')}</td>
+                        <td>
+                            <button class="action-btn success" onclick="approveWithdraw(${idx})">পেইড</button>
+                            <button class="action-btn danger" onclick="rejectWithdraw(${idx})">রিজেক্ট</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function approveWithdraw(idx){
+            const withdraw = pendingWithdraws[idx];
+            transactions.forEach(t => {
+                if(t.username === withdraw.username && t.type === 'Withdraw' && t.amount === withdraw.amount){
+                    t.status = 'Success';
+                }
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            pendingWithdraws.splice(idx, 1);
+            localStorage.setItem('pendingWithdraws', JSON.stringify(pendingWithdraws));
+            loadData();
+            showMsg('withdrawsMsg', 'উইথড্র কমপ্লিট মার্ক করা হয়েছে', 'success');
+        }
+
+        function rejectWithdraw(idx){
+            const withdraw = pendingWithdraws[idx];
+            const user = users.find(u => u.username === withdraw.username);
+            if(user){
+                user.balance += withdraw.amount;
+                saveUsers();
+            }
+            transactions.forEach(t => {
+                if(t.username === withdraw.username && t.type === 'Withdraw' && t.amount === withdraw.amount){
+                    t.status = 'Rejected';
+                }
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            pendingWithdraws.splice(idx, 1);
+            localStorage.setItem('pendingWithdraws', JSON.stringify(pendingWithdraws));
+            loadData();
+            showMsg('withdrawsMsg', 'উইথড্র রিজেক্ট করা হয়েছে, টাকা ফেরত দেওয়া হয়েছে', 'error');
+        }
+
+        function loadPlans(){
+            const list = document.getElementById('plansList');
+            list.innerHTML = '';
+            if(!settings.plans) settings.plans = [];
+
+            settings.plans.forEach((plan, idx) => {
+                list.innerHTML += `
+                    <div class="plan-card">
+                        <h4>${plan.name} - ৳${plan.price}</h4>
+                        <div class="plan-info">দৈনিক টাস্ক: ${plan.dailyTask}টি</div>
+                        <div class="plan-info">টাস্ক রেট: ৳${plan.taskRate}</div>
+                        <div class="plan-info">মাসিক আয়: ৳${plan.dailyTask * plan.taskRate * 30}</div>
+                        <div class="toggle">
+                            <label>স্ট্যাটাস:</label>
+                            <input type="checkbox" ${plan.enabled? 'checked' : ''} onchange="togglePlan(${idx})">
+                            <span>${plan.enabled? 'একটিভ' : 'ইনএকটিভ'}</span>
+                        </div>
+                        <button class="danger action-btn" onclick="deletePlan(${idx})">ডিলিট</button>
+                    </div>`;
+            });
+        }
+
+        function addPlan(){
+            const name = prompt('প্ল্যানের নাম:');
+            const price = parseInt(prompt('দাম (৳):'));
+            const dailyTask = parseInt(prompt('দৈনিক টাস্ক:'));
+            const taskRate = parseInt(prompt('টাস্ক রেট (৳):'));
+
+            if(name && price && dailyTask && taskRate){
+                if(!settings.plans) settings.plans = [];
+                settings.plans.push({name, price, dailyTask, taskRate, enabled: true});
+                localStorage.setItem('adminSettings', JSON.stringify(settings));
+                loadPlans();
+                showMsg('plansMsg', 'প্ল্যান যোগ করা হয়েছে', 'success');
+            }
+        }
+
+        function togglePlan(idx){
+            settings.plans[idx].enabled =!settings.plans[idx].enabled;
+            localStorage.setItem('adminSettings', JSON.stringify(settings));
+            loadPlans();
+        }
+
+        function deletePlan(idx){
+            if(confirm('এই প্ল্যান ডিলিট করতে চান?')){
+                settings.plans.splice(idx, 1);
+                localStorage.setItem('adminSettings', JSON.stringify(settings));
+                loadPlans();
+            }
+        }
+
+        function loadUsers(){
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${u.name}</td>
+                        <td>${u.username}</td>
+                        <td>${u.phone}</td>
+                        <td>৳${u.balance || 0}</td>
+                        <td>${u.planActive? u.planName : 'ইনএকটিভ'}</td>
+                        <td>
+                            <button class="action-btn" onclick="editUser('${u.username}')">এডিট</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function editUser(username){
+            const user = users.find(u => u.username === username);
+            const newBalance = prompt(`ব্যালেন্স এডিট করুন (${user.name}):`, user.balance);
+            if(newBalance!== null){
+                user.balance = parseInt(newBalance) || 0;
+                saveUsers();
+                loadUsers();
+            }
+        }
+
+        function loadSettings(){
+            document.getElementById('siteName').value = settings.siteName || 'EARN-PRO-MAX';
+            document.getElementById('siteLogo').value = settings.siteLogo || '';
+            document.getElementById('dailyNotice').value = settings.dailyNotice || '';
+            document.getElementById('telegramUsername').value = settings.telegramUsername || '';
+            document.getElementById('bkashNumber').value = settings.bkashNumber || '';
+            document.getElementById('nagadNumber').value = settings.nagadNumber || '';
+            document.getElementById('paymentInstruction').value = settings.paymentInstruction || 'উপরের নাম্বারে সেন্ড মানি করুন।';
+            document.getElementById('referBonus').value = settings.referBonus || 25;
+            document.getElementById('inactiveMessage').value = settings.inactiveMessage || 'আপনার অ্যাকাউন্ট অ্যাক্টিভ না।';
+        }
+
+        function saveSettings(){
+            settings.siteName = document.getElementById('siteName').value;
+            settings.siteLogo = document.getElementById('siteLogo').value;
+            settings.dailyNotice = document.getElementById('dailyNotice').value;
+            settings.telegramUsername = document.getElementById('telegramUsername').value;
+            settings.bkashNumber = document.getElementById('bkashNumber').value;
+            settings.nagadNumber = document.getElementById('nagadNumber').value;
+            settings.paymentInstruction = document.getElementById('paymentInstruction').value;
+            settings.referBonus = parseInt(document.getElementById('referBonus').value) || 25;
+            settings.inactiveMessage = document.getElementById('inactiveMessage').value;
+            localStorage.setItem('adminSettings', JSON.stringify(settings));
+            showMsg('settingsMsg', 'সেটিংস সেভ হয়েছে', 'success');
+        }
+
+        function saveUsers(){
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function showMsg(id, text, type){
+            const msg = document.getElementById(id);
+            msg.innerHTML = `<div class="msg ${type}">${text}</div>`;
+            setTimeout(() => msg.innerHTML = '', 3000);
+        }
+    </script>
+</body>
+</html>
