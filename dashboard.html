@@ -136,4 +136,599 @@
         }
 .input-group input:disabled { background: #f5f5f5; color: #666; }
         button {
-            width: 100%; padding: 13
+            width: 100%; padding: 13px; background: #1a1a2e; color: white;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; margin-top: 10px; transition: 0.2s;
+        }
+        button:hover { background: #16213e; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+.task-item {
+            border: 1px solid #e8eaf6; padding: 16px; border-radius: 10px;
+            margin-bottom: 12px; background: #fafbff;
+        }
+.task-item h4 { font-size: 15px; color: #1a1a2e; margin-bottom: 8px; font-weight: 600; }
+.task-item p { font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.5; }
+.task-reward { color: #1a1a2e; font-weight: 600; }
+.page { display: none; }
+.page.active { display: block; }
+.msg { padding: 12px; margin: 10px 0; border-radius: 8px; text-align: center; font-size: 14px; }
+.success { background: #d4edda; color: #155724; }
+.error { background: #f8d7da; color: #721c24; }
+.empty { text-align: center; color: #999; padding: 25px; font-size: 14px; }
+
+.modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; align-items: center;
+            justify-content: center; z-index: 300; padding: 20px;
+        }
+.modal.active { display: flex; }
+.modal-content {
+            background: white; border-radius: 14px; padding: 25px;
+            max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto;
+        }
+.modal-header { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 15px; }
+.modal-close {
+            float: right; font-size: 28px; color: #999; cursor: pointer;
+            line-height: 20px;
+        }
+.payment-info {
+            background: #f8f9ff; padding: 15px; border-radius: 8px;
+            margin: 15px 0; border: 1px solid #e8eaf6;
+        }
+.payment-info p { font-size: 14px; color: #333; margin: 8px 0; line-height: 1.6; }
+.payment-info strong { color: #1a1a2e; font-size: 16px; }
+
+.txn-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.txn-table th,.txn-table td {
+            padding: 12px 8px; text-align: left; border-bottom: 1px solid #e8eaf6; font-size: 13px;
+        }
+.txn-table th { background: #f8f9ff; color: #1a1a2e; font-weight: 600; }
+.badge {
+            padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+        }
+.badge-success { background: #d4edda; color: #155724; }
+.badge-pending { background: #fff3cd; color: #856404; }
+.badge-reject { background: #f8d7da; color: #721c24; }
+
+.support-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+            background: #0088cc; color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 4px 12px rgba(0,136,204,0.4);
+            cursor: pointer; z-index: 99; transition: 0.3s;
+        }
+.support-btn:hover { transform: scale(1.1); background: #0077b5; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+        <img id="siteLogo" class="site-logo" src="" alt="Logo" style="display:none;">
+        <h1 id="siteName">EARN-PRO-MAX</h1>
+    </div>
+
+    <div class="marquee-box" id="noticeBox" style="display:none;">
+        <div class="marquee-text" id="noticeText"></div>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="menu-item active" onclick="showPage('dashboard')">
+            <span>📊</span> Dashboard
+        </div>
+        <div class="menu-item" onclick="showPage('profile')">
+            <span>👤</span> Profile
+        </div>
+        <div class="menu-item" onclick="showPage('plan')">
+            <span>💎</span> Buy Plan
+        </div>
+        <div class="menu-item" onclick="showPage('withdraw')">
+            <span>💸</span> Withdraw
+        </div>
+        <div class="menu-item" onclick="showPage('transaction')">
+            <span>📋</span> Transaction Record
+        </div>
+        <div class="menu-item" onclick="showPage('refer')">
+            <span>🔗</span> Refer
+        </div>
+        <div class="menu-item" onclick="logout()">
+            <span>🚪</span> Logout
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="dashboardPage" class="page active">
+            <div class="welcome-text">স্বাগতম <span id="welcomeName"></span></div>
+
+            <div class="main-balance">
+                <div class="main-balance-label">মেইন ব্যালেন্স</div>
+                <div class="main-balance-amount">৳<span id="userBalance">0</span></div>
+                <div class="today-income">
+                    আজকের ইনকাম: <span>৳<span id="todayIncome">0</span></span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4 id="totalEarned">0</h4>
+                    <p>মোট আয়</p>
+                </div>
+                <div class="stat-card">
+                    <h4 id="tasksDone">0</h4>
+                    <p>টাস্ক সম্পন্ন</p>
+                </div>
+            </div>
+
+            <div id="inactiveBanner" class="inactive-banner hidden">
+                <h3>অ্যাকাউন্ট ইনএকটিভ</h3>
+                <p id="inactiveText">আপনার অ্যাকাউন্ট অ্যাক্টিভ না। প্যাকেজ কিনে আয় শুরু করুন।</p>
+            </div>
+
+            <div id="packageSection">
+                <div class="section-title">উপলব্ধ প্যাকেজসমূহ</div>
+                <div id="packageGrid" class="package-grid"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">আজকের টাস্কসমূহ</div>
+                <div id="taskMsg"></div>
+                <div id="taskList"></div>
+            </div>
+        </div>
+
+        <div id="profilePage" class="page">
+            <div class="section">
+                <div class="section-title">প্রোফাইল তথ্য</div>
+                <div id="profileMsg"></div>
+                <div class="input-group">
+                    <label>নাম</label>
+                    <input type="text" id="profileName" disabled>
+                </div>
+                <div class="input-group">
+                    <label>ইউজারনেম</label>
+                    <input type="text" id="profileUser" disabled>
+                </div>
+                <div class="input-group">
+                    <label>ইমেইল</label>
+                    <input type="email" id="profileEmail">
+                </div>
+                <div class="input-group">
+                    <label>মোবাইল</label>
+                    <input type="text" id="profilePhone" disabled>
+                </div>
+                <button onclick="updateProfile()">আপডেট করুন</button>
+            </div>
+        </div>
+
+        <div id="planPage" class="page">
+            <div class="section">
+                <div class="section-title">প্যাকেজ কিনুন</div>
+                <div id="planMsg"></div>
+                <div id="planList"></div>
+            </div>
+        </div>
+
+        <div id="withdrawPage" class="page">
+            <div class="section">
+                <div class="section-title">টাকা তুলুন</div>
+                <div id="withdrawMsg"></div>
+                <div class="input-group">
+                    <label>উত্তোলন এমাউন্ট (৳)</label>
+                    <input type="number" id="withdrawAmount" placeholder="মিনিমাম ৳500">
+                </div>
+                <div class="input-group">
+                    <label>পেমেন্ট মেথড</label>
+                    <select id="withdrawMethod">
+                        <option value="bkash">বিকাশ</option>
+                        <option value="nagad">নগদ</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>একাউন্ট নাম্বার</label>
+                    <input type="text" id="withdrawNumber" placeholder="01XXXXXXXXX">
+                </div>
+                <button onclick="submitWithdraw()">উইথড্র রিকোয়েস্ট</button>
+                <p style="font-size: 12px; color: #666; text-align: center; margin-top: 15px;">মিনিমাম উইথড্র: ৳500 | প্রসেসিং: 24 ঘন্টা</p>
+            </div>
+        </div>
+
+        <div id="transactionPage" class="page">
+            <div class="section">
+                <div class="section-title">লেনদেন রেকর্ড</div>
+                <table class="txn-table">
+                    <thead>
+                        <tr>
+                            <th>তারিখ</th>
+                            <th>টাইপ</th>
+                            <th>এমাউন্ট</th>
+                            <th>স্ট্যাটাস</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txnTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="referPage" class="page">
+            <div class="section">
+                <div class="section-title">রেফার করে আয় করুন</div>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">আপনার রেফার লিংক শেয়ার করুন। প্রতি রেফারে বোনাস!</p>
+                <div class="refer-box" id="referLink"></div>
+                <button onclick="copyRefer()">লিংক কপি করুন</button>
+                <div style="margin-top: 20px;">
+                    <p style="font-size: 14px; color: #666;">মোট রেফার: <strong id="totalRefer">0</strong> জন</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closePaymentModal()">&times;</span>
+            <div class="modal-header">পেমেন্ট করুন</div>
+            <div id="paymentModalMsg"></div>
+            <div class="payment-info">
+                <p id="paymentPackageInfo"></p>
+                <p><strong>বিকাশ:</strong> <span id="modalBkash"></span></p>
+                <p><strong>নগদ:</strong> <span id="modalNagad"></span></p>
+                <p id="modalInstruction" style="margin-top: 12px; font-size: 13px;"></p>
+            </div>
+            <div class="input-group">
+                <label>ট্রানজেকশন ID</label>
+                <input type="text" id="txnId" placeholder="ট্রানজেকশন ID লিখুন">
+            </div>
+            <button onclick="submitPayment()">সাবমিট করুন</button>
+            <p style="font-size: 12px; color: #666; text-align: center; margin-top: 12px;">পেমেন্ট যাচাই করার পর প্ল্যান একটিভ হবে</p>
+        </div>
+    </div>
+
+    <div class="support-btn" id="supportBtn" onclick="openSupport()" style="display:none;">💬</div>
+
+    <script>
+        let currentUser = null;
+        let users = [];
+        let settings = {
+            referBonus: 25,
+            inactiveMessage: 'আপনার অ্যাকাউন্ট অ্যাক্টিভ না। প্যাকেজ কিনে আয় শুরু করুন।',
+            bkashNumber: '',
+            nagadNumber: '',
+            paymentInstruction: 'উপরের নাম্বারে সেন্ড মানি করুন। তারপর ট্রানজেকশন ID নিচের বক্সে দিন।',
+            plans: [],
+            siteLogo: '',
+            siteName: 'EARN-PRO-MAX',
+            dailyNotice: '',
+            telegramUsername: ''
+        };
+        let selectedPackage = null;
+        let transactions = [];
+
+        window.onload = function(){
+            const username = localStorage.getItem('currentUser');
+            if(!username){
+                window.location.href = 'index.html';
+                return;
+            }
+            users = JSON.parse(localStorage.getItem('users') || '[]');
+            currentUser = users.find(u => u.username === username);
+            settings = JSON.parse(localStorage.getItem('adminSettings') || JSON.stringify(settings));
+            transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+
+            if(currentUser.todayIncomeDate!== new Date().toDateString()){
+                currentUser.todayIncome = 0;
+                currentUser.todayIncomeDate = new Date().toDateString();
+                currentUser.todayTasks = 0;
+                saveUsers();
+            }
+
+            if(settings.siteLogo){
+                document.getElementById('siteLogo').src = settings.siteLogo;
+                document.getElementById('siteLogo').style.display = 'block';
+                document.getElementById('siteName').style.display = 'none';
+            } else {
+                document.getElementById('siteName').innerText = settings.siteName || 'EARN-PRO-MAX';
+            }
+
+            if(settings.dailyNotice){
+                document.getElementById('noticeText').innerText = settings.dailyNotice;
+                document.getElementById('noticeBox').style.display = 'block';
+            }
+
+            if(settings.telegramUsername){
+                document.getElementById('supportBtn').style.display = 'flex';
+            }
+
+            loadData();
+        }
+
+        function openSupport(){
+            if(settings.telegramUsername){
+                window.open('https://t.me/' + settings.telegramUsername, '_blank');
+            }
+        }
+
+        function toggleMenu(){
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function showPage(page){
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+            toggleMenu();
+            if(page === 'profile') loadProfile();
+            if(page === 'refer') loadRefer();
+            if(page === 'plan') loadPlans();
+            if(page === 'transaction') loadTransactions();
+        }
+
+        function loadData(){
+            document.getElementById('welcomeName').innerText = currentUser.name;
+            document.getElementById('userBalance').innerText = currentUser.balance;
+            document.getElementById('totalEarned').innerText = currentUser.totalEarned || 0;
+            document.getElementById('tasksDone').innerText = currentUser.tasksCompleted || 0;
+            document.getElementById('todayIncome').innerText = currentUser.todayIncome || 0;
+            document.getElementById('referLink').innerText = window.location.origin + '/?ref=' + currentUser.myReferCode;
+            document.getElementById('inactiveText').innerText = settings.inactiveMessage;
+
+            if(!currentUser.planActive){
+                document.getElementById('inactiveBanner').classList.remove('hidden');
+                document.getElementById('packageSection').classList.remove('hidden');
+            } else {
+                document.getElementById('inactiveBanner').classList.add('hidden');
+                document.getElementById('packageSection').classList.add('hidden');
+            }
+
+            loadPackages();
+            loadTasks();
+        }
+
+        function loadPackages(){
+            const grid = document.getElementById('packageGrid');
+            grid.innerHTML = '';
+            const activePackages = settings.plans.filter(p => p.enabled);
+
+            if(activePackages.length === 0){
+                grid.innerHTML = '<div class="empty">কোনো প্যাকেজ উপলব্ধ নেই</div>';
+                return;
+            }
+
+            activePackages.forEach(pkg => {
+                grid.innerHTML += `
+                    <div class="package-card">
+                        <h4>${pkg.name}</h4>
+                        <div class="package-price">৳${pkg.price}</div>
+                        <div class="package-info">${pkg.dailyTask} টাস্ক/দিন</div>
+                        <div class="package-info">৳${pkg.taskRate}/টাস্ক</div>
+                        <button onclick='openPaymentModal(${JSON.stringify(pkg)})'>কিনুন</button>
+                    </div>`;
+            });
+        }
+
+        function openPaymentModal(pkg){
+            selectedPackage = pkg;
+            document.getElementById('paymentPackageInfo').innerText = `${pkg.name} - ৳${pkg.price}`;
+            document.getElementById('modalBkash').innerText = settings.bkashNumber || 'সেট করা হয়নি';
+            document.getElementById('modalNagad').innerText = settings.nagadNumber || 'সেট করা হয়নি';
+            document.getElementById('modalInstruction').innerText = settings.paymentInstruction;
+            document.getElementById('txnId').value = '';
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closePaymentModal(){
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        function submitPayment(){
+            const txnId = document.getElementById('txnId').value.trim();
+            if(!txnId){
+                showMsg('paymentModalMsg', 'ট্রানজেকশন ID দিন', 'error');
+                return;
+            }
+
+            let payments = JSON.parse(localStorage.getItem('pendingPayments') || '[]');
+            payments.push({
+                username: currentUser.username,
+                packageName: selectedPackage.name,
+                amount: selectedPackage.price,
+                txnId: txnId,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('pendingPayments', JSON.stringify(payments));
+
+            transactions.push({
+                username: currentUser.username,
+                type: 'Plan Purchase',
+                amount: selectedPackage.price,
+                date: new Date().toISOString(),
+                status: 'Pending'
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            closePaymentModal();
+            alert('পেমেন্ট সাবমিট হয়েছে! এডমিন এপ্রুভ করার পর প্ল্যান একটিভ হবে।');
+        }
+
+        function loadProfile(){
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileUser').value = currentUser.username;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profilePhone').value = currentUser.phone;
+        }
+
+        function updateProfile(){
+            const newEmail = document.getElementById('profileEmail').value.trim();
+            if(!newEmail){
+                showMsg('profileMsg', 'ইমেইল খালি রাখা যাবে না', 'error');
+                return;
+            }
+            if(users.find(u => u.email === newEmail && u.username!== currentUser.username)){
+                showMsg('profileMsg', 'এই ইমেইল অন্য একাউন্টে ব্যবহৃত', 'error');
+                return;
+            }
+            currentUser.email = newEmail;
+            saveUsers();
+            showMsg('profileMsg', 'প্রোফাইল আপডেট হয়েছে', 'success');
+        }
+
+        function loadRefer(){
+            const refCount = users.filter(u => u.referredBy === currentUser.username).length;
+            document.getElementById('totalRefer').innerText = refCount;
+        }
+
+        function copyRefer(){
+            navigator.clipboard.writeText(document.getElementById('referLink').innerText);
+            alert('রেফার লিংক কপি হয়েছে!');
+        }
+
+        function loadTasks(){
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            if(!currentUser.planActive){
+                taskList.innerHTML = '<div class="empty">টাস্ক করতে প্রথমে প্যাকেজ কিনুন</div>';
+                return;
+            }
+            const plan = settings.plans.find(p => p.price === currentUser.planPrice);
+            if(!plan) return;
+
+            for(let i = 1; i <= plan.dailyTask; i++){
+                const done = currentUser.todayTasks >= i;
+                taskList.innerHTML += `
+                    <div class="task-item">
+                        <h4>টাস্ক #${i}</h4>
+                        <p>ইউটিউব ভিডিও দেখুন + লাইক ও কমেন্ট করুন</p>
+                        <p class="task-reward">পুরস্কার: ৳${plan.taskRate}</p>
+                        <button onclick="completeTask(${i})" ${done? 'disabled' : ''}>${done? 'সম্পন্ন হয়েছে' : 'কমপ্লিট করুন'}</button>
+                    </div>`;
+            }
+        }
+
+        function completeTask(num){
+            const plan = settings.plans.find(p => p.price === currentUser.planPrice);
+            currentUser.balance += plan.taskRate;
+            currentUser.totalEarned = (currentUser.totalEarned || 0) + plan.taskRate;
+            currentUser.todayIncome = (currentUser.todayIncome || 0) + plan.taskRate;
+            currentUser.tasksCompleted = (currentUser.tasksCompleted || 0) + 1;
+            currentUser.todayTasks = (currentUser.todayTasks || 0) + 1;
+
+            transactions.push({
+                username: currentUser.username,
+                type: 'Task Income',
+                amount: plan.taskRate,
+                date: new Date().toISOString(),
+                status: 'Success'
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            saveUsers();
+            loadData();
+            showMsg('taskMsg', `টাস্ক কমপ্লিট! ৳${plan.taskRate} যোগ হয়েছে`, 'success');
+        }
+
+        function loadPlans(){
+            const planList = document.getElementById('planList');
+            planList.innerHTML = '';
+            const activePackages = settings.plans.filter(p => p.enabled);
+
+            activePackages.forEach(plan => {
+                const active = currentUser.planActive && currentUser.planPrice === plan.price;
+                planList.innerHTML += `
+                    <div class="package-card" style="margin-bottom: 15px; text-align: left;">
+                        <h4 style="font-size: 17px; color: #1a1a2e; margin-bottom: 10px;">${plan.name}</h4>
+                        <div class="package-price" style="text-align: center;">৳${plan.price}</div>
+                        <ul style="font-size: 14px; color: #666; margin: 15px 0; padding-left: 20px;">
+                            <li>দৈনিক ${plan.dailyTask}টি টাস্ক</li>
+                            <li>প্রতি টাস্কে ৳${plan.taskRate}</li>
+                            <li>মাসিক সম্ভাব্য আয় ৳${plan.dailyTask * plan.taskRate * 30}</li>
+                        </ul>
+                        <button onclick='openPaymentModal(${JSON.stringify(plan)})' ${active? 'disabled' : ''}>${active? 'একটিভ আছে' : 'প্যাকেজ কিনুন'}</button>
+                    </div>`;
+            });
+        }
+
+        function submitWithdraw(){
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const method = document.getElementById('withdrawMethod').value;
+            const number = document.getElementById('withdrawNumber').value.trim();
+
+            if(!amount || amount < 500){
+                showMsg('withdrawMsg', 'মিনিমাম ৳500 তুলতে পারবেন', 'error');
+                return;
+            }
+            if(amount > currentUser.balance){
+                showMsg('withdrawMsg', 'ব্যালেন্স পর্যাপ্ত নয়', 'error');
+                return;
+            }
+            if(!number){
+                showMsg('withdrawMsg', 'একাউন্ট নাম্বার দিন', 'error');
+                return;
+            }
+
+            currentUser.balance -= amount;
+            saveUsers();
+
+            let withdraws = JSON.parse(localStorage.getItem('pendingWithdraws') || '[]');
+            withdraws.push({
+                username: currentUser.username,
+                amount: amount,
+                method: method,
+                number: number,
+                date: new Date().toISOString(),
+                status: 'Pending'
+            });
+            localStorage.setItem('pendingWithdraws', JSON.stringify(withdraws));
+
+            transactions.push({
+                username: currentUser.username,
+                type: 'Withdraw',
+                amount: amount,
+                date: new Date().toISOString(),
+                status: 'Pending'
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawNumber').value = '';
+            loadData();
+            showMsg('withdrawMsg', 'উইথড্র রিকোয়েস্ট সাবমিট হয়েছে! 24 ঘন্টার মধ্যে প্রসেস হবে', 'success');
+        }
+
+        function loadTransactions(){
+            const tbody = document.getElementById('txnTable');
+            const userTxns = transactions.filter(t => t.username === currentUser.username).reverse();
+
+            if(userTxns.length === 0){
+                tbody.innerHTML = '<tr><td colspan="4" class="empty">কোনো লেনদেন নেই</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            userTxns.forEach(txn => {
+                let badgeClass = 'badge-pending';
+                if(txn.status === 'Success') badgeClass = 'badge-success';
+                if(txn.status === 'Rejected') badgeClass = 'badge-reject';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${new Date(txn.date).toLocaleDateString('bn-BD')}</td>
+                        <td>${txn.type}</td>
+                        <td>৳${txn.amount}</td>
+                        <td><span class="badge ${badgeClass}">${txn.status}</span></td>
+                    </tr>`;
+            });
+        }
+
+        function saveUsers(){
+            const idx = users.findIndex(u => u.username === currentUser.username);
+            users[idx] = currentUser;
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function logout(){
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        function showMsg(id, text, type){
