@@ -6,122 +6,134 @@
     <title>EARN-PRO-MAX - Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; }
-      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
-      .header h1 { font-size: 20px; }
-      .logout { position: absolute; right: 15px; top: 15px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-      .container { padding: 15px; padding-bottom: 80px; max-width: 500px; margin: auto; }
-      .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-      .balance { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-      .balance h3 { font-size: 14px; opacity: 0.9; }
-      .balance h1 { font-size: 32px; margin: 10px 0; }
-      .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-      .stat { text-align: center; }
-      .stat h4 { font-size: 20px; color: #667eea; }
-      .stat p { font-size: 12px; color: #666; }
-        button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:disabled { background: #ccc; }
-      .refer-box { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px; word-break: break-all; font-size: 12px; }
-      .task-item { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-      .task-item h4 { font-size: 14px; margin-bottom: 5px; }
-      .task-item p { font-size: 12px; color: #666; }
-      .plan-item { border: 2px solid #667eea; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
-      .plan-item h3 { color: #667eea; margin-bottom: 10px; }
-      .plan-item .price { font-size: 24px; font-weight: bold; margin: 10px 0; }
-      .plan-item ul { text-align: left; font-size: 13px; margin: 10px 0; padding-left: 20px; }
-      .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
-      .nav-item { flex: 1; text-align: center; padding: 12px 5px; cursor: pointer; font-size: 12px; color: #666; }
-      .nav-item.active { color: #667eea; font-weight: bold; }
-      .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
-      .page { display: none; }
-      .page.active { display: block; }
-      .hidden { display: none; }
-      .msg { padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; font-size: 13px; }
-      .success { background: #d4edda; color: #155724; }
-      .error { background: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>EARN-PRO-MAX</h1>
-        <div class="logout" onclick="logout()">লগআউট</div>
-    </div>
-    <div class="container">
-        <div id="homePage" class="page active">
-            <div class="card balance">
-                <h3>আপনার ব্যালেন্স</h3>
-                <h1>৳<span id="userBalance">0</span></h1>
-                <div class="stat-grid">
-                    <div class="stat">
-                        <h4 id="totalEarned">0</h4>
-                        <p>মোট আয়</p>
-                    </div>
-                    <div class="stat">
-                        <h4 id="tasksDone">0</h4>
-                        <p>টাস্ক কমপ্লিট</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>রেফার করে আয় করুন</h3>
-                <p style="font-size: 13px; color: #666; margin: 10px 0;">আপনার লিংক শেয়ার করুন। প্রতি রেফারে ৳25 বোনাস!</p>
-                <div class="refer-box" id="referLink"></div>
-                <button onclick="copyRefer()">লিংক কপি করুন</button>
-            </div>
-        </div>
-        <div id="taskPage" class="page">
-            <div class="card">
-                <h3>আজকের টাস্ক</h3>
-                <div id="taskMsg"></div>
-                <div id="taskList"></div>
-            </div>
-        </div>
-        <div id="planPage" class="page">
-            <div class="card">
-                <h3>প্ল্যান কিনুন</h3>
-                <div id="planMsg"></div>
-                <div id="planList"></div>
-            </div>
-        </div>
-    </div>
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="showPage('home')">
-            <i>🏠</i> Home
-        </div>
-        <div class="nav-item" onclick="showPage('task')">
-            <i>📋</i> Task
-        </div>
-        <div class="nav-item" onclick="showPage('plan')">
-            <i>💎</i> Buy Plan
-        </div>
-    </div>
-    <script>
-        let currentUser = null;
-        let users = [];
-        let settings = { referBonus: 25, plans: [
-            {name: 'Basic Plan', price: 300, dailyTask: 5, taskRate: 5},
-            {name: 'Silver Plan', price: 700, dailyTask: 12, taskRate: 7},
-            {name: 'Gold Plan', price: 1500, dailyTask: 25, taskRate: 10}
-        ]};
-        window.onload = function(){
-            const username = localStorage.getItem('currentUser');
-            if(!username){
-                window.location.href = 'index.html';
-                return;
-            }
-            users = JSON.parse(localStorage.getItem('users') || '[]');
-            currentUser = users.find(u => u.username === username);
-            settings = JSON.parse(localStorage.getItem('adminSettings') || JSON.stringify(settings));
-            loadData();
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+.header {
+            background: #1a1a2e; color: white; padding: 12px 20px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
         }
-        function loadData(){
-            document.getElementById('userBalance').innerText = currentUser.balance;
-            document.getElementById('totalEarned').innerText = currentUser.totalEarned;
-            document.getElementById('tasksDone').innerText = currentUser.tasksCompleted;
-            document.getElementById('referLink').innerText = window.location.origin + '/?ref=' + currentUser.myReferCode;
-            loadTasks();
-            loadPlans();
+.menu-btn {
+            font-size: 22px; cursor: pointer; padding: 6px 10px;
+            border-radius: 6px; transition: 0.2s;
         }
-        function showPage(page){
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n
+.menu-btn:hover { background: rgba(255,255,255,0.1); }
+.site-logo { height: 35px; width: auto; max-width: 150px; object-fit: contain; }
+.header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.3px; }
+
+.marquee-box {
+            background: #667eea; color: white; padding: 10px 0;
+            overflow: hidden; white-space: nowrap; position: relative;
+        }
+.marquee-text {
+            display: inline-block; padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            font-size: 14px; font-weight: 500;
+        }
+@keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+.sidebar {
+            position: fixed; left: -280px; top: 0; width: 280px; height: 100vh;
+            background: white; box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            transition: 0.3s; z-index: 200; padding-top: 70px; overflow-y: auto;
+        }
+.sidebar.active { left: 0; }
+.sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); display: none; z-index: 150;
+        }
+.sidebar-overlay.active { display: block; }
+.menu-item {
+            padding: 16px 25px; color: #333; cursor: pointer;
+            font-size: 15px; border-bottom: 1px solid #f0f0f0;
+            transition: 0.2s; display: flex; align-items: center; gap: 14px;
+            font-weight: 500;
+        }
+.menu-item:hover { background: #f8f9ff; color: #1a1a2e; }
+.menu-item.active { background: #f8f9ff; color: #1a1a2e; font-weight: 600; border-left: 3px solid #1a1a2e; }
+.container { padding: 20px; max-width: 700px; margin: 0 auto; }
+
+.welcome-text {
+            font-size: 24px; font-weight: 700; color: #1a1a2e;
+            margin-bottom: 20px; text-align: center;
+        }
+.welcome-text span { color: #667eea; }
+
+.main-balance {
+            background: white; border-radius: 14px; padding: 35px 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 18px;
+            text-align: center; border-top: 4px solid #1a1a2e;
+        }
+.main-balance-label {
+            font-size: 13px; color: #666; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;
+        }
+.main-balance-amount {
+            font-size: 48px; font-weight: 700; color: #1a1a2e;
+            margin-bottom: 12px; line-height: 1.2;
+        }
+.today-income {
+            font-size: 16px; color: #666; font-weight: 500;
+            padding-top: 18px; border-top: 1px solid #e8eaf6; margin-top: 18px;
+        }
+.today-income span { color: #1a1a2e; font-weight: 700; font-size: 20px; }
+
+.inactive-banner {
+            background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px;
+            padding: 18px; margin-bottom: 20px; color: #856404;
+        }
+.inactive-banner h3 { font-size: 16px; margin-bottom: 8px; font-weight: 600; }
+.inactive-banner p { font-size: 14px; line-height: 1.5; }
+
+.section-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 25px 0 15px 0; }
+.package-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px; margin-bottom: 25px;
+        }
+.package-card {
+            background: white; border-radius: 10px; padding: 22px 18px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08); text-align: center;
+            border: 2px solid #e8eaf6; transition: 0.3s;
+        }
+.package-card:hover { border-color: #1a1a2e; transform: translateY(-3px); }
+.package-card h4 { font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 500; }
+.package-price { font-size: 30px; font-weight: 700; color: #1a1a2e; margin: 12px 0; }
+.package-info { font-size: 12px; color: #888; margin: 8px 0; }
+.package-card button {
+            width: 100%; padding: 11px; background: #1a1a2e; color: white;
+            border: none; border-radius: 7px; font-size: 14px; font-weight: 600;
+            cursor: pointer; margin-top: 12px; transition: 0.2s;
+        }
+.package-card button:hover { background: #16213e; }
+
+.stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            margin-bottom: 20px;
+        }
+.stat-card {
+            background: white; border-radius: 10px; padding: 18px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08); text-align: center;
+        }
+.stat-card h4 { font-size: 24px; color: #1a1a2e; font-weight: 700; margin-bottom: 5px; }
+.stat-card p { font-size: 12px; color: #666; font-weight: 500; }
+
+.section {
+            background: white; border-radius: 12px; padding: 22px;
+            margin-bottom: 20px; box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+.refer-box {
+            background: #f8f9ff; padding: 12px; border-radius: 8px;
+            word-break: break-all; font-size: 13px; color: #333; margin: 12px 0;
+            border: 1px solid #e8eaf6;
+        }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+.input-group input,.input-group select {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; background: white;
+        }
+.input-group input:disabled { background: #f5f5f5; color: #666; }
+        button {
+            width: 100%; padding: 13
