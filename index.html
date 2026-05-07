@@ -11,7 +11,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
         }
-        .container {
+      .container {
             background: white; padding: 30px; border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 90%; max-width: 400px;
         }
@@ -26,12 +26,12 @@
             cursor: pointer; margin-top: 10px;
         }
         button:hover { background: #5568d3; }
-        .toggle { text-align: center; margin-top: 15px; color: #666; cursor: pointer; }
-        .toggle span { color: #667eea; font-weight: bold; }
-        .hidden { display: none; }
-        .msg { padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+      .toggle { text-align: center; margin-top: 15px; color: #666; cursor: pointer; }
+      .toggle span { color: #667eea; font-weight: bold; }
+      .hidden { display: none; }
+      .msg { padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; }
+      .success { background: #d4edda; color: #155724; }
+      .error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -49,8 +49,10 @@
             <div id="regMsg"></div>
             <input type="text" id="regName" placeholder="পুরো নাম">
             <input type="text" id="regUser" placeholder="ইউজারনেম">
-            <input type="password" id="regPass" placeholder="পাসওয়ার্ড">
+            <input type="email" id="regEmail" placeholder="ইমেইল">
             <input type="text" id="regPhone" placeholder="মোবাইল নাম্বার">
+            <input type="password" id="regPass" placeholder="পাসওয়ার্ড">
+            <input type="password" id="regPassConfirm" placeholder="কনফার্ম পাসওয়ার্ড">
             <input type="text" id="regRefer" placeholder="রেফার কোড (যদি থাকে)">
             <button onclick="register()">রেজিস্টার করুন</button>
             <div class="toggle">একাউন্ট আছে? <span onclick="showLogin()">লগইন করুন</span></div>
@@ -61,9 +63,74 @@
         function showRegister(){document.getElementById('loginBox').classList.add('hidden');document.getElementById('registerBox').classList.remove('hidden');}
         function showLogin(){document.getElementById('registerBox').classList.add('hidden');document.getElementById('loginBox').classList.remove('hidden');}
         window.onload=function(){const urlParams=new URLSearchParams(window.location.search);const ref=urlParams.get('ref');if(ref)document.getElementById('regRefer').value=ref;}
-        function register(){const name=document.getElementById('regName').value.trim();const user=document.getElementById('regUser').value.trim();const pass=document.getElementById('regPass').value;const phone=document.getElementById('regPhone').value.trim();const refer=document.getElementById('regRefer').value.trim();if(!name||!user||!pass||!phone){showMsg('regMsg','সব ঘর পূরণ করুন','error');return;}let users=JSON.parse(localStorage.getItem('users')||'[]');if(users.find(u=>u.username===user)){showMsg('regMsg','এই ইউজারনেম আগে থেকেই আছে','error');return;}const newUser={name:name,username:user,password:pass,phone:phone,balance:0,planActive:false,referredBy:refer,myReferCode:user,tasksCompleted:0,totalEarned:0};users.push(newUser);if(refer){const refUser=users.find(u=>u.username===refer);if(refUser){let settings=JSON.parse(localStorage.getItem('adminSettings')||'{}');const bonus=settings.referBonus||25;refUser.balance+=bonus;refUser.totalEarned+=bonus;}}localStorage.setItem('users',JSON.stringify(users));showMsg('regMsg','রেজিস্টার সফল! লগইন করুন','success');setTimeout(showLogin,1500);}
-        function login(){const user=document.getElementById('loginUser').value.trim();const pass=document.getElementById('loginPass').value;let users=JSON.parse(localStorage.getItem('users')||'[]');const foundUser=users.find(u=>u.username===user&&u.password===pass);if(foundUser){localStorage.setItem('currentUser',user);window.location.href='dashboard.html';}else{showMsg('loginMsg','ইউজারনেম বা পাসওয়ার্ড ভুল','error');}}
-        function showMsg(id,text,type){const msg=document.getElementById(id);msg.className='msg '+type;msg.innerText=text;}
+        
+        function register(){
+            const name=document.getElementById('regName').value.trim();
+            const user=document.getElementById('regUser').value.trim();
+            const email=document.getElementById('regEmail').value.trim();
+            const phone=document.getElementById('regPhone').value.trim();
+            const pass=document.getElementById('regPass').value;
+            const passConfirm=document.getElementById('regPassConfirm').value;
+            const refer=document.getElementById('regRefer').value.trim();
+            
+            if(!name||!user||!email||!phone||!pass||!passConfirm){
+                showMsg('regMsg','সব ঘর পূরণ করুন','error');return;
+            }
+            if(pass !== passConfirm){
+                showMsg('regMsg','পাসওয়ার্ড মিলছে না','error');return;
+            }
+            if(pass.length < 6){
+                showMsg('regMsg','পাসওয়ার্ড কমপক্ষে 6 অক্ষর হতে হবে','error');return;
+            }
+            
+            let users=JSON.parse(localStorage.getItem('users')||'[]');
+            
+            if(users.find(u=>u.username===user)){
+                showMsg('regMsg','এই ইউজারনেম আগে থেকেই আছে','error');return;
+            }
+            if(users.find(u=>u.email===email)){
+                showMsg('regMsg','এই ইমেইল দিয়ে একাউন্ট আছে','error');return;
+            }
+            if(users.find(u=>u.phone===phone)){
+                showMsg('regMsg','এই নাম্বার দিয়ে একাউন্ট আছে','error');return;
+            }
+            
+            const newUser={name:name,username:user,email:email,password:pass,phone:phone,balance:0,planActive:false,referredBy:refer,myReferCode:user,tasksCompleted:0,totalEarned:0,todayTasks:0,planPrice:0};
+            users.push(newUser);
+            
+            if(refer){
+                const refUser=users.find(u=>u.username===refer);
+                if(refUser){
+                    let settings=JSON.parse(localStorage.getItem('adminSettings')||'{}');
+                    const bonus=settings.referBonus||25;
+                    refUser.balance+=bonus;
+                    refUser.totalEarned+=bonus;
+                }
+            }
+            
+            localStorage.setItem('users',JSON.stringify(users));
+            showMsg('regMsg','রেজিস্টার সফল! লগইন করুন','success');
+            setTimeout(showLogin,1500);
+        }
+        
+        function login(){
+            const user=document.getElementById('loginUser').value.trim();
+            const pass=document.getElementById('loginPass').value;
+            let users=JSON.parse(localStorage.getItem('users')||'[]');
+            const foundUser=users.find(u=>u.username===user&&u.password===pass);
+            if(foundUser){
+                localStorage.setItem('currentUser',user);
+                window.location.href='dashboard.html';
+            }else{
+                showMsg('loginMsg','ইউজারনেম বা পাসওয়ার্ড ভুল','error');
+            }
+        }
+        
+        function showMsg(id,text,type){
+            const msg=document.getElementById(id);
+            msg.className='msg '+type;
+            msg.innerText=text;
+        }
     </script>
 </body>
 </html>
